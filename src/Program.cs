@@ -7,8 +7,15 @@ namespace SoundDeck
         [STAThread]
         public static void Main()
         {
-            App app = new App();
-            app.Run();
+            try
+            {
+                App app = new App();
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                System.IO.File.WriteAllText("crash_log.txt", ex.ToString());
+            }
         }
     }
 }

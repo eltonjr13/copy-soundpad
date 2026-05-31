@@ -1,0 +1,229 @@
+[2026-05-31 00:16:45.550] Dispositivo de Transmissão selecionado: CABLE In 16ch (VB-Audio Virtual
+[2026-05-31 00:16:45.618] EnsureTransmissionDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:16:45.619] Mixer de Transmissão criado.
+[2026-05-31 00:16:45.619] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 4
+[2026-05-31 00:16:45.643] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:16:45.645] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:16:45.647] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:16:45.649] UpdateMicPassthrough: Nenhum microfone selecionado.
+[2026-05-31 00:16:45.649] Dispositivo de Monitoramento selecionado: Nenhum
+[2026-05-31 00:16:45.651] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:16:45.652] Microfone selecionado: Microphone (7- FIFINE Microphon
+[2026-05-31 00:16:45.652] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:16:45.653] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:16:45.654] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:16:45.658] EnsureTransmissionDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:16:45.659] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:16:45.660] CRÍTICO: Erro ao iniciar passthrough de microfone: Must be already floating point
+[2026-05-31 00:16:45.662] Volume Master atualizado para: 0,9023595
+[2026-05-31 00:18:01.154] Dispositivo de Transmissão selecionado: CABLE Input (VB-Audio Virtual C
+[2026-05-31 00:18:01.157] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:18:01.157] EnsureTransmissionDevice: Parando player anterior.
+[2026-05-31 00:18:01.170] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 1
+[2026-05-31 00:18:01.188] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:18:01.189] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:18:01.189] StopMicPassthrough: Parando e descartando WaveInEvent.
+[2026-05-31 00:18:01.191] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:18:01.192] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:18:01.192] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:18:01.194] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:18:01.195] CRÍTICO: Erro ao iniciar passthrough de microfone: Must be already floating point
+[2026-05-31 00:18:01.199] _transmissionOut parou normalmente.
+[2026-05-31 00:18:15.131] Dispositivo de Monitoramento selecionado: FxSound Speakers (FxSound Audio
+[2026-05-31 00:18:15.132] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:18:15.134] Mixer de Monitoramento criado.
+[2026-05-31 00:18:15.134] EnsureMonitorDevice: Inicializando WaveOutEvent no index 0
+[2026-05-31 00:18:15.142] EnsureMonitorDevice: Player de monitoramento iniciado com sucesso.
+[2026-05-31 00:18:46.836] Dispositivo de Transmissão selecionado: CABLE In 16ch (VB-Audio Virtual
+[2026-05-31 00:18:46.840] EnsureTransmissionDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:18:46.840] EnsureTransmissionDevice: Parando player anterior.
+[2026-05-31 00:18:46.850] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 4
+[2026-05-31 00:18:46.866] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:18:46.867] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:18:46.867] StopMicPassthrough: Parando e descartando WaveInEvent.
+[2026-05-31 00:18:46.867] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:18:46.869] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:18:46.873] EnsureTransmissionDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:18:46.873] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:18:46.873] CRÍTICO: Erro ao iniciar passthrough de microfone: Must be already floating point
+[2026-05-31 00:18:46.877] _transmissionOut parou normalmente.
+[2026-05-31 00:18:50.285] Dispositivo de Transmissão selecionado: CABLE Input (VB-Audio Virtual C
+[2026-05-31 00:18:50.286] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:18:50.288] EnsureTransmissionDevice: Parando player anterior.
+[2026-05-31 00:18:50.299] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 1
+[2026-05-31 00:18:50.314] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:18:50.316] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:18:50.316] StopMicPassthrough: Parando e descartando WaveInEvent.
+[2026-05-31 00:18:50.316] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:18:50.318] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:18:50.319] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:18:50.319] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:18:50.319] CRÍTICO: Erro ao iniciar passthrough de microfone: Must be already floating point
+[2026-05-31 00:18:50.324] _transmissionOut parou normalmente.
+[2026-05-31 00:18:52.437] Dispositivo de Transmissão selecionado: CABLE In 16ch (VB-Audio Virtual
+[2026-05-31 00:18:52.441] EnsureTransmissionDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:18:52.441] EnsureTransmissionDevice: Parando player anterior.
+[2026-05-31 00:18:52.451] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 4
+[2026-05-31 00:18:52.467] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:18:52.468] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:18:52.468] StopMicPassthrough: Parando e descartando WaveInEvent.
+[2026-05-31 00:18:52.469] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:18:52.470] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:18:52.472] EnsureTransmissionDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:18:52.472] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:18:52.474] CRÍTICO: Erro ao iniciar passthrough de microfone: Must be already floating point
+[2026-05-31 00:18:52.477] _transmissionOut parou normalmente.
+[2026-05-31 00:19:08.002] Dispositivo de Monitoramento selecionado: CABLE Input (VB-Audio Virtual C
+[2026-05-31 00:19:08.005] EnsureMonitorDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:08.005] EnsureMonitorDevice: Parando player de monitoramento anterior.
+[2026-05-31 00:19:08.015] EnsureMonitorDevice: Inicializando WaveOutEvent no index 1
+[2026-05-31 00:19:08.032] CRÍTICO: Erro ao iniciar dispositivo de monitoramento: AlreadyAllocated calling waveOutOpen
+[2026-05-31 00:19:10.562] Dispositivo de Monitoramento selecionado: CABLE In 16ch (VB-Audio Virtual
+[2026-05-31 00:19:10.565] EnsureMonitorDevice: Selecionado=CABLE In 16ch (VB-Audio Virtual, Index=4
+[2026-05-31 00:19:10.567] EnsureMonitorDevice: Parando player de monitoramento anterior.
+[2026-05-31 00:19:10.567] EnsureMonitorDevice: Inicializando WaveOutEvent no index 4
+[2026-05-31 00:19:10.578] EnsureMonitorDevice: Player de monitoramento iniciado com sucesso.
+[2026-05-31 00:19:12.668] Dispositivo de Monitoramento selecionado: FxSound Speakers (FxSound Audio
+[2026-05-31 00:19:12.670] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:19:12.670] EnsureMonitorDevice: Parando player de monitoramento anterior.
+[2026-05-31 00:19:12.679] EnsureMonitorDevice: Inicializando WaveOutEvent no index 0
+[2026-05-31 00:19:12.686] EnsureMonitorDevice: Player de monitoramento iniciado com sucesso.
+[2026-05-31 00:19:21.065] Dispositivo de Transmissão selecionado: CABLE Input (VB-Audio Virtual C
+[2026-05-31 00:19:21.068] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:21.069] EnsureTransmissionDevice: Parando player anterior.
+[2026-05-31 00:19:21.079] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 1
+[2026-05-31 00:19:21.095] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:19:21.095] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:19:21.097] StopMicPassthrough: Parando e descartando WaveInEvent.
+[2026-05-31 00:19:21.097] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:19:21.098] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:19:21.099] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:21.101] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:19:21.104] CRÍTICO: Erro ao iniciar passthrough de microfone: Must be already floating point
+[2026-05-31 00:19:21.108] _transmissionOut parou normalmente.
+[2026-05-31 00:19:27.351] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:19:27.353] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:27.353] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:19:27.379] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:19:27.379] EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.
+[2026-05-31 00:19:27.382] Play: Configurando canal de Monitoramento para o som.
+[2026-05-31 00:19:27.384] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:19:27.386] Play: Adicionando som ao mixer de monitoramento.
+[2026-05-31 00:19:30.333] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:19:30.333] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:19:30.336] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:30.338] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:19:30.339] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:19:30.341] EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.
+[2026-05-31 00:19:30.343] Play: Configurando canal de Monitoramento para o som.
+[2026-05-31 00:19:30.345] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:19:30.346] Play: Adicionando som ao mixer de monitoramento.
+[2026-05-31 00:19:37.282] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:19:37.282] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:19:37.285] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:37.285] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:19:37.286] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:19:37.288] EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.
+[2026-05-31 00:19:37.290] Play: Configurando canal de Monitoramento para o som.
+[2026-05-31 00:19:37.291] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:19:37.292] Play: Adicionando som ao mixer de monitoramento.
+[2026-05-31 00:19:50.217] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:19:50.218] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:19:50.221] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:19:50.221] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:19:50.224] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:19:50.224] EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.
+[2026-05-31 00:19:50.228] Play: Configurando canal de Monitoramento para o som.
+[2026-05-31 00:19:50.229] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:19:50.229] Play: Adicionando som ao mixer de monitoramento.
+[2026-05-31 00:20:01.373] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:20:01.374] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:20:01.376] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:20:01.378] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:20:01.380] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:20:01.381] EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.
+[2026-05-31 00:20:01.384] Play: Configurando canal de Monitoramento para o som.
+[2026-05-31 00:20:01.385] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:20:01.385] Play: Adicionando som ao mixer de monitoramento.
+[2026-05-31 00:20:12.439] Dispositivo de Monitoramento selecionado: Nenhum
+[2026-05-31 00:20:12.439] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:20:12.440] EnsureMonitorDevice: Desativando monitoramento.
+[2026-05-31 00:20:13.425] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:20:13.425] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:20:13.428] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:20:13.428] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:20:13.432] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:20:13.433] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:20:16.120] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:20:16.121] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:20:16.122] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:20:16.124] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:20:16.126] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:20:16.129] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:20:18.080] Play: Solicitado som voce-nao-tem-aura (C:\Users\elton\Downloads\voce-nao-tem-aura.mp3)
+[2026-05-31 00:20:18.082] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:20:18.083] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:20:18.085] PrepareSampleProvider: Resampling de 48000Hz para 44100Hz
+[2026-05-31 00:20:18.086] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:20:18.088] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:20:35.986] Stop: Forçando parada do som: 5e25cc96-b804-43c5-9fcf-4a2c6a6a4b49
+[2026-05-31 00:20:39.300] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:20:41.040] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:20:41.043] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:20:41.043] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:20:41.046] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:20:41.049] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:20:43.056] Stop: Forçando parada do som: 97eec07c-7674-43eb-8159-b49dc7ec560d
+[2026-05-31 00:31:04.439] Dispositivo de Transmissão selecionado: CABLE Input (VB-Audio Virtual C
+[2026-05-31 00:31:04.498] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:31:04.500] Mixer de Transmissão criado.
+[2026-05-31 00:31:04.500] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 1
+[2026-05-31 00:31:04.525] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:31:04.529] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:31:04.530] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:31:04.530] UpdateMicPassthrough: Nenhum microfone selecionado.
+[2026-05-31 00:31:04.531] Dispositivo de Monitoramento selecionado: Nenhum
+[2026-05-31 00:31:04.533] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:31:04.533] Microfone selecionado: Microphone (7- FIFINE Microphon
+[2026-05-31 00:31:04.534] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:31:04.536] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:31:04.539] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:31:04.541] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:31:04.541] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:31:04.545] UpdateMicPassthrough: Adicionando microfone ao mixer de transmissão.
+[2026-05-31 00:31:04.546] UpdateMicPassthrough: Iniciando gravação do microfone.
+[2026-05-31 00:31:04.562] UpdateMicPassthrough: Gravação iniciada.
+[2026-05-31 00:31:04.563] Volume Master atualizado para: 0,9023595
+[2026-05-31 00:35:56.441] Dispositivo de Transmissão selecionado: CABLE Input (VB-Audio Virtual C
+[2026-05-31 00:35:56.496] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:35:56.498] Mixer de Transmissão criado.
+[2026-05-31 00:35:56.498] EnsureTransmissionDevice: Inicializando WaveOutEvent no index 1
+[2026-05-31 00:35:56.524] EnsureTransmissionDevice: Player iniciado com sucesso.
+[2026-05-31 00:35:56.528] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:35:56.529] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:35:56.530] UpdateMicPassthrough: Nenhum microfone selecionado.
+[2026-05-31 00:35:56.530] Dispositivo de Monitoramento selecionado: Nenhum
+[2026-05-31 00:35:56.532] EnsureMonitorDevice: Selecionado=Nenhum, Index=-1
+[2026-05-31 00:35:56.533] Microfone selecionado: Microphone (7- FIFINE Microphon
+[2026-05-31 00:35:56.533] UpdateMicPassthrough: Iniciando atualização.
+[2026-05-31 00:35:56.533] StopMicPassthrough: Parado com sucesso.
+[2026-05-31 00:35:56.536] UpdateMicPassthrough: MicName=Microphone (7- FIFINE Microphon, Index=0
+[2026-05-31 00:35:56.538] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:35:56.539] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:35:56.541] UpdateMicPassthrough: Adicionando microfone ao mixer de transmissão.
+[2026-05-31 00:35:56.543] UpdateMicPassthrough: Iniciando gravação do microfone.
+[2026-05-31 00:35:56.560] UpdateMicPassthrough: Gravação iniciada.
+[2026-05-31 00:35:56.561] Volume Master atualizado para: 0,9023595
+[2026-05-31 00:37:06.276] Dispositivo de Monitoramento selecionado: FxSound Speakers (FxSound Audio
+[2026-05-31 00:37:06.278] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:37:06.279] Mixer de Monitoramento criado.
+[2026-05-31 00:37:06.279] EnsureMonitorDevice: Inicializando WaveOutEvent no index 0
+[2026-05-31 00:37:06.287] EnsureMonitorDevice: Player de monitoramento iniciado com sucesso.
+[2026-05-31 00:39:52.422] Play: Solicitado som faaah (C:\Users\elton\Downloads\faaah.mp3)
+[2026-05-31 00:39:52.424] EnsureTransmissionDevice: Selecionado=CABLE Input (VB-Audio Virtual C, Index=1
+[2026-05-31 00:39:52.424] EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.
+[2026-05-31 00:39:52.466] EnsureMonitorDevice: Selecionado=FxSound Speakers (FxSound Audio, Index=0
+[2026-05-31 00:39:52.468] EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.
+[2026-05-31 00:39:52.471] Play: Configurando canal de Monitoramento para o som.
+[2026-05-31 00:39:52.474] Play: Adicionando som ao mixer de transmissão.
+[2026-05-31 00:39:52.474] Play: Adicionando som ao mixer de monitoramento.

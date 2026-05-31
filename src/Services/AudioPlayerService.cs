@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using SoundDeck.Models;
 
 namespace SoundDeck.Services
@@ -15,17 +16,74 @@ namespace SoundDeck.Services
         private static string _selectedMonitorName = "Nenhum";
         private static string _selectedMicName = "Nenhum";
 
+        // Dispositivo de Transmissão (Principal)
+        private static WaveOutEvent _transmissionOut;
+        private static MixingSampleProvider _transmissionMixer;
+        private static int _transmissionDeviceIndex = -2;
+
+        // Dispositivo de Monitoramento (Secundário)
+        private static WaveOutEvent _monitorOut;
+        private static MixingSampleProvider _monitorMixer;
+        private static int _monitorDeviceIndex = -2;
+
         // Variáveis para o Passthrough do Microfone
         private static WaveInEvent _micIn;
-        private static WaveOutEvent _micOut;
         private static BufferedWaveProvider _micBuffer;
+        private static ISampleProvider _micSampleProvider;
 
         private class PlayingSound
         {
-            public WaveOutEvent WaveOutPrimary { get; set; }
             public AudioFileReader ReaderPrimary { get; set; }
-            public WaveOutEvent WaveOutMonitor { get; set; }
+            public ISampleProvider MixerInputPrimary { get; set; }
             public AudioFileReader ReaderMonitor { get; set; }
+            public ISampleProvider MixerInputMonitor { get; set; }
+        }
+
+        private static void LogDebug(string message)
+        {
+            try
+            {
+                string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "audio_log.txt");
+                File.AppendAllText(logPath, string.Format("[{0:yyyy-MM-dd HH:mm:ss.fff}] {1}\r\n", DateTime.Now, message));
+            }
+            catch {}
+        }
+
+        private class CallbackSampleProvider : ISampleProvider
+        {
+            private readonly ISampleProvider _source;
+            private readonly Action _onEnded;
+            private bool _ended;
+
+            public CallbackSampleProvider(ISampleProvider source, Action onEnded)
+            {
+                _source = source;
+                _onEnded = onEnded;
+            }
+
+            public int Read(float[] buffer, int offset, int count)
+            {
+                if (_ended)
+                {
+                    return 0;
+                }
+
+                int read = _source.Read(buffer, offset, count);
+                if (read == 0)
+                {
+                    _ended = true;
+                    if (_onEnded != null)
+                    {
+                        _onEnded();
+                    }
+                }
+                return read;
+            }
+
+            public WaveFormat WaveFormat
+            {
+                get { return _source.WaveFormat; }
+            }
         }
 
         public static float MasterVolume
@@ -36,6 +94,7 @@ namespace SoundDeck.Services
                 lock (_lock)
                 {
                     _masterVolume = value;
+                    LogDebug("Volume Master atualizado para: " + value);
                 }
             }
         }
@@ -48,6 +107,8 @@ namespace SoundDeck.Services
                 lock (_lock)
                 {
                     _selectedDeviceName = value;
+                    LogDebug("Dispositivo de Transmissão selecionado: " + value);
+                    EnsureTransmissionDevice();
                 }
                 UpdateMicPassthrough();
             }
@@ -61,6 +122,8 @@ namespace SoundDeck.Services
                 lock (_lock)
                 {
                     _selectedMonitorName = value;
+                    LogDebug("Dispositivo de Monitoramento selecionado: " + value);
+                    EnsureMonitorDevice();
                 }
             }
         }
@@ -73,6 +136,7 @@ namespace SoundDeck.Services
                 lock (_lock)
                 {
                     _selectedMicName = value;
+                    LogDebug("Microfone selecionado: " + value);
                 }
                 UpdateMicPassthrough();
             }
@@ -93,7 +157,7 @@ namespace SoundDeck.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Erro ao listar dispositivos: " + ex.Message);
+                LogDebug("Erro ao listar dispositivos de saída: " + ex.Message);
             }
             return devices;
         }
@@ -113,7 +177,7 @@ namespace SoundDeck.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Erro ao listar microfones: " + ex.Message);
+                LogDebug("Erro ao listar microfones: " + ex.Message);
             }
             return mics;
         }
@@ -139,7 +203,7 @@ namespace SoundDeck.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Erro ao buscar índice do dispositivo: " + ex.Message);
+                LogDebug("Erro ao buscar índice do dispositivo '" + name + "': " + ex.Message);
             }
 
             return -1;
@@ -166,10 +230,172 @@ namespace SoundDeck.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Erro ao buscar índice do microfone: " + ex.Message);
+                LogDebug("Erro ao buscar índice do microfone '" + name + "': " + ex.Message);
             }
 
             return -1;
+        }
+
+        private static void EnsureTransmissionDevice()
+        {
+            int outputIndex = GetDeviceIndex(_selectedDeviceName);
+            LogDebug(string.Format("EnsureTransmissionDevice: Selecionado={0}, Index={1}", _selectedDeviceName, outputIndex));
+
+            if (_transmissionMixer == null)
+            {
+                var format = WaveFormat.CreateIeeeFloatWaveFormat(44100, 2);
+                _transmissionMixer = new MixingSampleProvider(format);
+                _transmissionMixer.ReadFully = true;
+                LogDebug("Mixer de Transmissão criado.");
+            }
+
+            if (_transmissionOut != null && _transmissionDeviceIndex == outputIndex)
+            {
+                LogDebug("EnsureTransmissionDevice: Player já está inicializado no dispositivo correto.");
+                return;
+            }
+
+            if (_transmissionOut != null)
+            {
+                try
+                {
+                    LogDebug("EnsureTransmissionDevice: Parando player anterior.");
+                    _transmissionOut.Stop();
+                }
+                catch (Exception ex) { LogDebug("Erro ao parar _transmissionOut: " + ex.Message); }
+                try { _transmissionOut.Dispose(); } catch {}
+                _transmissionOut = null;
+            }
+
+            try
+            {
+                LogDebug(string.Format("EnsureTransmissionDevice: Inicializando WaveOutEvent no index {0}", outputIndex));
+                _transmissionOut = new WaveOutEvent
+                {
+                    DeviceNumber = outputIndex,
+                    DesiredLatency = 100
+                };
+                
+                // Monitoramento de paradas inesperadas
+                _transmissionOut.PlaybackStopped += (s, e) =>
+                {
+                    if (e.Exception != null)
+                    {
+                        LogDebug("CRÍTICO: _transmissionOut parou com erro: " + e.Exception.Message);
+                    }
+                    else
+                    {
+                        LogDebug("_transmissionOut parou normalmente.");
+                    }
+                };
+
+                _transmissionOut.Init(_transmissionMixer);
+                _transmissionOut.Play();
+                _transmissionDeviceIndex = outputIndex;
+                LogDebug("EnsureTransmissionDevice: Player iniciado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                LogDebug("CRÍTICO: Erro ao iniciar dispositivo de transmissão: " + ex.Message);
+            }
+        }
+
+        private static void EnsureMonitorDevice()
+        {
+            int monitorIndex = GetDeviceIndex(_selectedMonitorName);
+            LogDebug(string.Format("EnsureMonitorDevice: Selecionado={0}, Index={1}", _selectedMonitorName, monitorIndex));
+
+            if (string.IsNullOrEmpty(_selectedMonitorName) || _selectedMonitorName.Equals("Nenhum", StringComparison.OrdinalIgnoreCase) || monitorIndex < -1)
+            {
+                if (_monitorOut != null)
+                {
+                    try
+                    {
+                        LogDebug("EnsureMonitorDevice: Desativando monitoramento.");
+                        _monitorOut.Stop();
+                    }
+                    catch (Exception ex) { LogDebug("Erro ao parar _monitorOut: " + ex.Message); }
+                    try { _monitorOut.Dispose(); } catch {}
+                    _monitorOut = null;
+                }
+                _monitorDeviceIndex = -2;
+                return;
+            }
+
+            if (_monitorMixer == null)
+            {
+                var format = WaveFormat.CreateIeeeFloatWaveFormat(44100, 2);
+                _monitorMixer = new MixingSampleProvider(format);
+                _monitorMixer.ReadFully = true;
+                LogDebug("Mixer de Monitoramento criado.");
+            }
+
+            if (_monitorOut != null && _monitorDeviceIndex == monitorIndex)
+            {
+                LogDebug("EnsureMonitorDevice: Player de monitoramento já inicializado no dispositivo correto.");
+                return;
+            }
+
+            if (_monitorOut != null)
+            {
+                try
+                {
+                    LogDebug("EnsureMonitorDevice: Parando player de monitoramento anterior.");
+                    _monitorOut.Stop();
+                }
+                catch (Exception ex) { LogDebug("Erro ao parar _monitorOut: " + ex.Message); }
+                try { _monitorOut.Dispose(); } catch {}
+                _monitorOut = null;
+            }
+
+            try
+            {
+                LogDebug(string.Format("EnsureMonitorDevice: Inicializando WaveOutEvent no index {0}", monitorIndex));
+                _monitorOut = new WaveOutEvent
+                {
+                    DeviceNumber = monitorIndex,
+                    DesiredLatency = 100
+                };
+                
+                _monitorOut.PlaybackStopped += (s, e) =>
+                {
+                    if (e.Exception != null)
+                    {
+                        LogDebug("CRÍTICO: _monitorOut parou com erro: " + e.Exception.Message);
+                    }
+                };
+
+                _monitorOut.Init(_monitorMixer);
+                _monitorOut.Play();
+                _monitorDeviceIndex = monitorIndex;
+                LogDebug("EnsureMonitorDevice: Player de monitoramento iniciado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                LogDebug("CRÍTICO: Erro ao iniciar dispositivo de monitoramento: " + ex.Message);
+            }
+        }
+
+        private static ISampleProvider PrepareSampleProvider(ISampleProvider source, WaveFormat targetFormat)
+        {
+            ISampleProvider current = source;
+
+            if (current.WaveFormat.SampleRate != targetFormat.SampleRate)
+            {
+                LogDebug(string.Format("PrepareSampleProvider: Resampling de {0}Hz para {1}Hz", current.WaveFormat.SampleRate, targetFormat.SampleRate));
+                current = new WdlResamplingSampleProvider(current, targetFormat.SampleRate);
+            }
+
+            if (current.WaveFormat.Channels != targetFormat.Channels)
+            {
+                LogDebug(string.Format("PrepareSampleProvider: Convertendo canais de {0} para {1}", current.WaveFormat.Channels, targetFormat.Channels));
+                if (current.WaveFormat.Channels == 1 && targetFormat.Channels == 2)
+                {
+                    current = new MonoToStereoSampleProvider(current);
+                }
+            }
+
+            return current;
         }
 
         // Atualiza o redirecionamento do microfone para o canal de transmissão
@@ -177,24 +403,28 @@ namespace SoundDeck.Services
         {
             lock (_lock)
             {
+                LogDebug("UpdateMicPassthrough: Iniciando atualização.");
                 StopMicPassthrough();
 
                 if (string.IsNullOrEmpty(_selectedMicName) || _selectedMicName.Equals("Nenhum", StringComparison.OrdinalIgnoreCase))
                 {
+                    LogDebug("UpdateMicPassthrough: Nenhum microfone selecionado.");
                     return;
                 }
 
                 try
                 {
                     int micIndex = GetMicIndex(_selectedMicName);
-                    int outputIndex = GetDeviceIndex(_selectedDeviceName);
-
+                    LogDebug(string.Format("UpdateMicPassthrough: MicName={0}, Index={1}", _selectedMicName, micIndex));
+                    
                     if (micIndex >= 0)
                     {
+                        EnsureTransmissionDevice();
+
                         _micIn = new WaveInEvent
                         {
                             DeviceNumber = micIndex,
-                            BufferMilliseconds = 30, // Latência muito baixa (30ms)
+                            BufferMilliseconds = 50, // Latência baixa e estável (50ms)
                             WaveFormat = new WaveFormat(44100, 16, 1) // Qualidade CD (44.1 kHz, 16-bit, Mono)
                         };
 
@@ -203,31 +433,35 @@ namespace SoundDeck.Services
                             DiscardOnBufferOverflow = true
                         };
 
-                        _micOut = new WaveOutEvent
-                        {
-                            DeviceNumber = outputIndex
-                        };
+                        ISampleProvider floatSource = _micBuffer.ToSampleProvider();
+                        ISampleProvider stereoSource = new MonoToStereoSampleProvider(floatSource);
 
-                        _micOut.Init(_micBuffer);
+                        _micSampleProvider = PrepareSampleProvider(stereoSource, _transmissionMixer.WaveFormat);
 
                         _micIn.DataAvailable += (sender, e) =>
                         {
-                            lock (_lock)
+                            var buffer = _micBuffer;
+                            if (buffer != null)
                             {
-                                if (_micBuffer != null)
-                                {
-                                    _micBuffer.AddSamples(e.Buffer, 0, e.BytesRecorded);
-                                }
+                                buffer.AddSamples(e.Buffer, 0, e.BytesRecorded);
                             }
                         };
 
-                        _micOut.Play();
+                        LogDebug("UpdateMicPassthrough: Adicionando microfone ao mixer de transmissão.");
+                        _transmissionMixer.AddMixerInput(_micSampleProvider);
+                        
+                        LogDebug("UpdateMicPassthrough: Iniciando gravação do microfone.");
                         _micIn.StartRecording();
+                        LogDebug("UpdateMicPassthrough: Gravação iniciada.");
+                    }
+                    else
+                    {
+                        LogDebug("UpdateMicPassthrough: Index do microfone é menor que zero.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("Erro ao iniciar passthrough de microfone: " + ex.Message);
+                    LogDebug("CRÍTICO: Erro ao iniciar passthrough de microfone: " + ex.Message);
                 }
             }
         }
@@ -241,21 +475,25 @@ namespace SoundDeck.Services
                 {
                     if (_micIn != null)
                     {
+                        LogDebug("StopMicPassthrough: Parando e descartando WaveInEvent.");
                         _micIn.StopRecording();
                         _micIn.Dispose();
                         _micIn = null;
                     }
-                    if (_micOut != null)
+
+                    if (_micSampleProvider != null && _transmissionMixer != null)
                     {
-                        _micOut.Stop();
-                        _micOut.Dispose();
-                        _micOut = null;
+                        LogDebug("StopMicPassthrough: Removendo microfone do mixer.");
+                        _transmissionMixer.RemoveMixerInput(_micSampleProvider);
+                        _micSampleProvider = null;
                     }
+
                     _micBuffer = null;
+                    LogDebug("StopMicPassthrough: Parado com sucesso.");
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("Erro ao parar passthrough de microfone: " + ex.Message);
+                    LogDebug("Erro ao parar passthrough de microfone: " + ex.Message);
                 }
             }
         }
@@ -268,90 +506,121 @@ namespace SoundDeck.Services
                 throw new FileNotFoundException("Arquivo de som não encontrado.", sound != null ? sound.FilePath : "");
             }
 
+            LogDebug("Play: Solicitado som " + sound.Name + " (" + sound.FilePath + ")");
             Stop(sound.Id); // Para o som se ele já estiver tocando
 
             lock (_lock)
             {
                 try
                 {
-                    // 1. Configurar Dispositivo de Transmissão Primário
-                    int primaryIndex = GetDeviceIndex(_selectedDeviceName);
-                    var waveOutPrimary = new WaveOutEvent
-                    {
-                        DeviceNumber = primaryIndex
-                    };
+                    EnsureTransmissionDevice();
 
                     var readerPrimary = new AudioFileReader(sound.FilePath)
                     {
                         Volume = sound.Volume * masterVolume
                     };
 
-                    waveOutPrimary.Init(readerPrimary);
-
-                    // 2. Configurar Dispositivo de Monitoramento Secundário (se houver)
-                    WaveOutEvent waveOutMonitor = null;
-                    AudioFileReader readerMonitor = null;
-
-                    if (!string.IsNullOrEmpty(_selectedMonitorName) && !_selectedMonitorName.Equals("Nenhum", StringComparison.OrdinalIgnoreCase))
-                    {
-                        int monitorIndex = GetDeviceIndex(_selectedMonitorName);
-                        // Apenas cria se o dispositivo for diferente do primário
-                        if (monitorIndex != primaryIndex)
-                        {
-                            waveOutMonitor = new WaveOutEvent
-                            {
-                                DeviceNumber = monitorIndex
-                            };
-
-                            readerMonitor = new AudioFileReader(sound.FilePath)
-                            {
-                                Volume = sound.Volume * masterVolume
-                            };
-
-                            waveOutMonitor.Init(readerMonitor);
-                        }
-                    }
-
                     string soundId = sound.Id;
-                    waveOutPrimary.PlaybackStopped += (s, e) =>
+
+                    Action primaryFinished = new Action(() =>
                     {
                         lock (_lock)
                         {
+                            LogDebug("Playback de som finalizado no canal Primário: " + soundId);
                             PlayingSound active;
                             if (_activeSounds.TryGetValue(soundId, out active))
                             {
-                                if (active.ReaderPrimary != null) active.ReaderPrimary.Dispose();
-                                if (active.WaveOutPrimary != null) active.WaveOutPrimary.Dispose();
-                                if (active.ReaderMonitor != null) active.ReaderMonitor.Dispose();
-                                if (active.WaveOutMonitor != null) active.WaveOutMonitor.Dispose();
-                                _activeSounds.Remove(soundId);
+                                if (active.ReaderPrimary != null)
+                                {
+                                    active.ReaderPrimary.Dispose();
+                                    active.ReaderPrimary = null;
+                                }
+                                active.MixerInputPrimary = null;
+
+                                if (active.ReaderMonitor == null)
+                                {
+                                    _activeSounds.Remove(soundId);
+                                    LogDebug("Som removido completamente dos ativos (Primário encerrou por último/único).");
+                                    if (onPlaybackFinished != null)
+                                    {
+                                        onPlaybackFinished();
+                                    }
+                                }
                             }
                         }
-                        if (onPlaybackFinished != null)
+                    });
+
+                    ISampleProvider primarySource = PrepareSampleProvider(readerPrimary, _transmissionMixer.WaveFormat);
+                    var primaryInput = new CallbackSampleProvider(primarySource, primaryFinished);
+
+                    AudioFileReader readerMonitor = null;
+                    ISampleProvider monitorInput = null;
+
+                    EnsureMonitorDevice();
+                    int primaryDeviceIndex = GetDeviceIndex(_selectedDeviceName);
+                    int monitorDeviceIndex = GetDeviceIndex(_selectedMonitorName);
+
+                    if (_monitorOut != null && monitorDeviceIndex != primaryDeviceIndex)
+                    {
+                        LogDebug("Play: Configurando canal de Monitoramento para o som.");
+                        readerMonitor = new AudioFileReader(sound.FilePath)
                         {
-                            onPlaybackFinished.Invoke();
-                        }
-                    };
+                            Volume = sound.Volume * masterVolume
+                        };
+
+                        Action monitorFinished = new Action(() =>
+                        {
+                            lock (_lock)
+                            {
+                                LogDebug("Playback de som finalizado no canal Monitor: " + soundId);
+                                PlayingSound active;
+                                if (_activeSounds.TryGetValue(soundId, out active))
+                                {
+                                    if (active.ReaderMonitor != null)
+                                    {
+                                        active.ReaderMonitor.Dispose();
+                                        active.ReaderMonitor = null;
+                                    }
+                                    active.MixerInputMonitor = null;
+
+                                    if (active.ReaderPrimary == null)
+                                    {
+                                        _activeSounds.Remove(soundId);
+                                        LogDebug("Som removido completamente dos ativos (Monitor encerrou por último).");
+                                        if (onPlaybackFinished != null)
+                                        {
+                                            onPlaybackFinished();
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        ISampleProvider monitorSource = PrepareSampleProvider(readerMonitor, _monitorMixer.WaveFormat);
+                        monitorInput = new CallbackSampleProvider(monitorSource, monitorFinished);
+                    }
 
                     var playingState = new PlayingSound
                     {
-                        WaveOutPrimary = waveOutPrimary,
                         ReaderPrimary = readerPrimary,
-                        WaveOutMonitor = waveOutMonitor,
-                        ReaderMonitor = readerMonitor
+                        MixerInputPrimary = primaryInput,
+                        ReaderMonitor = readerMonitor,
+                        MixerInputMonitor = monitorInput
                     };
 
                     _activeSounds[sound.Id] = playingState;
 
-                    waveOutPrimary.Play();
-                    if (waveOutMonitor != null)
+                    LogDebug("Play: Adicionando som ao mixer de transmissão.");
+                    _transmissionMixer.AddMixerInput(primaryInput);
+                    if (monitorInput != null && _monitorMixer != null)
                     {
-                        waveOutMonitor.Play();
+                        LogDebug("Play: Adicionando som ao mixer de monitoramento.");
+                        _monitorMixer.AddMixerInput(monitorInput);
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("Erro ao reproduzir áudio: " + ex.Message);
+                    LogDebug("CRÍTICO: Erro ao reproduzir áudio: " + ex.Message);
                     throw;
                 }
             }
@@ -360,29 +629,7 @@ namespace SoundDeck.Services
         // Pausa um áudio
         public static void Pause(string soundId)
         {
-            lock (_lock)
-            {
-                PlayingSound active;
-                if (_activeSounds.TryGetValue(soundId, out active))
-                {
-                    if (active.WaveOutPrimary.PlaybackState == PlaybackState.Playing)
-                    {
-                        active.WaveOutPrimary.Pause();
-                        if (active.WaveOutMonitor != null)
-                        {
-                            active.WaveOutMonitor.Pause();
-                        }
-                    }
-                    else if (active.WaveOutPrimary.PlaybackState == PlaybackState.Paused)
-                    {
-                        active.WaveOutPrimary.Play();
-                        if (active.WaveOutMonitor != null)
-                        {
-                            active.WaveOutMonitor.Play();
-                        }
-                    }
-                }
-            }
+            // O Soundboard profissional usa apenas Play e Stop para reprodução instantânea
         }
 
         // Para um áudio
@@ -393,11 +640,26 @@ namespace SoundDeck.Services
                 PlayingSound active;
                 if (_activeSounds.TryGetValue(soundId, out active))
                 {
-                    active.WaveOutPrimary.Stop();
-                    if (active.WaveOutMonitor != null)
+                    LogDebug("Stop: Forçando parada do som: " + soundId);
+                    if (active.MixerInputPrimary != null)
                     {
-                        active.WaveOutMonitor.Stop();
+                        _transmissionMixer.RemoveMixerInput(active.MixerInputPrimary);
                     }
+                    if (active.MixerInputMonitor != null && _monitorMixer != null)
+                    {
+                        _monitorMixer.RemoveMixerInput(active.MixerInputMonitor);
+                    }
+
+                    if (active.ReaderPrimary != null)
+                    {
+                        active.ReaderPrimary.Dispose();
+                    }
+                    if (active.ReaderMonitor != null)
+                    {
+                        active.ReaderMonitor.Dispose();
+                    }
+
+                    _activeSounds.Remove(soundId);
                 }
             }
         }
@@ -407,20 +669,37 @@ namespace SoundDeck.Services
         {
             lock (_lock)
             {
+                LogDebug("StopAll: Parando todos os sons.");
                 var keys = new List<string>(_activeSounds.Keys);
                 foreach (var key in keys)
                 {
-                    PlayingSound active;
-                    if (_activeSounds.TryGetValue(key, out active))
-                    {
-                        active.WaveOutPrimary.Stop();
-                        if (active.WaveOutMonitor != null)
-                        {
-                            active.WaveOutMonitor.Stop();
-                        }
-                    }
+                    Stop(key);
                 }
+
+                if (_transmissionOut != null)
+                {
+                    try { _transmissionOut.Stop(); } catch {}
+                    try { _transmissionOut.Dispose(); } catch {}
+                    _transmissionOut = null;
+                }
+                _transmissionDeviceIndex = -2;
+
+                if (_monitorOut != null)
+                {
+                    try { _monitorOut.Stop(); } catch {}
+                    try { _monitorOut.Dispose(); } catch {}
+                    _monitorOut = null;
+                }
+                _monitorDeviceIndex = -2;
             }
+        }
+
+        // Para todos os áudios e também desliga o microfone (usado no encerramento)
+        public static void Shutdown()
+        {
+            LogDebug("Shutdown: Solicitado desligamento total.");
+            StopAll();
+            StopMicPassthrough();
         }
 
         // Atualiza dinamicamente o volume de um som em reprodução
@@ -445,12 +724,7 @@ namespace SoundDeck.Services
         {
             lock (_lock)
             {
-                PlayingSound active;
-                if (_activeSounds.TryGetValue(soundId, out active))
-                {
-                    return active.WaveOutPrimary.PlaybackState == PlaybackState.Playing;
-                }
-                return false;
+                return _activeSounds.ContainsKey(soundId);
             }
         }
 

@@ -20,7 +20,7 @@
       "Volume": 1.0,
       "Hotkey": "Ctrl+D2",
       "IsFavorite": false,
-      "HotkeyId": 1000
+      "HotkeyId": 1001
     }
   ],
   "Categories": [
@@ -122,7 +122,7 @@
     }
   ],
   "MasterVolume": 0.902359545,
-  "SelectedDevice": "CABLE In 16ch (VB-Audio Virtual",
+  "SelectedDevice": "CABLE Input (VB-Audio Virtual C",
   "SelectedMonitor": "FxSound Speakers (FxSound Audio",
   "SelectedMic": "Microphone (7- FIFINE Microphon",
   "MinimizeToTray": true
