@@ -1,0 +1,32 @@
+{
+  "Sounds": [],
+  "Categories": [
+    {
+      "Name": "Todos",
+      "Icon": "📁"
+    },
+    {
+      "Name": "Favoritos",
+      "Icon": "⭐"
+    },
+    {
+      "Name": "Memes",
+      "Icon": "😂"
+    },
+    {
+      "Name": "Efeitos",
+      "Icon": "⚡"
+    },
+    {
+      "Name": "Músicas",
+      "Icon": "🎵"
+    },
+    {
+      "Name": "Vozes",
+      "Icon": "🎙️"
+    }
+  ],
+  "MasterVolume": 0.8,
+  "SelectedDevice": "Padrão",
+  "MinimizeToTray": true
+}
