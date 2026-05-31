@@ -17,7 +17,11 @@ namespace SoundDeck.Services
                 if (File.Exists(ConfigFilePath))
                 {
                     string json = File.ReadAllText(ConfigFilePath);
-                    var config = JsonConvert.DeserializeObject<SoundDeckConfig>(json);
+                    var settings = new JsonSerializerSettings
+                    {
+                        ObjectCreationHandling = ObjectCreationHandling.Replace
+                    };
+                    var config = JsonConvert.DeserializeObject<SoundDeckConfig>(json, settings);
                     if (config != null)
                     {
                         return config;

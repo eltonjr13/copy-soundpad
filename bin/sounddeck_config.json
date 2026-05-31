@@ -1,6 +1,101 @@
 {
-  "Sounds": [],
+  "Sounds": [
+    {
+      "Id": "5e25cc96-b804-43c5-9fcf-4a2c6a6a4b49",
+      "Name": "voce-nao-tem-aura",
+      "FilePath": "C:\\Users\\elton\\Downloads\\voce-nao-tem-aura.mp3",
+      "DurationText": "00:16",
+      "CategoryName": "Memes",
+      "Volume": 1.0,
+      "Hotkey": "",
+      "IsFavorite": false,
+      "HotkeyId": 1000
+    },
+    {
+      "Id": "97eec07c-7674-43eb-8159-b49dc7ec560d",
+      "Name": "faaah",
+      "FilePath": "C:\\Users\\elton\\Downloads\\faaah.mp3",
+      "DurationText": "00:01",
+      "CategoryName": "Memes",
+      "Volume": 1.0,
+      "Hotkey": "",
+      "IsFavorite": false,
+      "HotkeyId": 1001
+    }
+  ],
   "Categories": [
+    {
+      "Name": "Todos",
+      "Icon": "📁"
+    },
+    {
+      "Name": "Favoritos",
+      "Icon": "⭐"
+    },
+    {
+      "Name": "Memes",
+      "Icon": "😂"
+    },
+    {
+      "Name": "Efeitos",
+      "Icon": "⚡"
+    },
+    {
+      "Name": "Músicas",
+      "Icon": "🎵"
+    },
+    {
+      "Name": "Vozes",
+      "Icon": "🎙️"
+    },
+    {
+      "Name": "Todos",
+      "Icon": "📁"
+    },
+    {
+      "Name": "Favoritos",
+      "Icon": "⭐"
+    },
+    {
+      "Name": "Memes",
+      "Icon": "😂"
+    },
+    {
+      "Name": "Efeitos",
+      "Icon": "⚡"
+    },
+    {
+      "Name": "Músicas",
+      "Icon": "🎵"
+    },
+    {
+      "Name": "Vozes",
+      "Icon": "🎙️"
+    },
+    {
+      "Name": "Todos",
+      "Icon": "📁"
+    },
+    {
+      "Name": "Favoritos",
+      "Icon": "⭐"
+    },
+    {
+      "Name": "Memes",
+      "Icon": "😂"
+    },
+    {
+      "Name": "Efeitos",
+      "Icon": "⚡"
+    },
+    {
+      "Name": "Músicas",
+      "Icon": "🎵"
+    },
+    {
+      "Name": "Vozes",
+      "Icon": "🎙️"
+    },
     {
       "Name": "Todos",
       "Icon": "📁"
@@ -26,7 +121,8 @@
       "Icon": "🎙️"
     }
   ],
-  "MasterVolume": 0.8,
-  "SelectedDevice": "Padrão",
+  "MasterVolume": 0.912359536,
+  "SelectedDevice": "CABLE Input (VB-Audio Virtual C",
+  "SelectedMonitor": "FxSound Speakers (FxSound Audio",
   "MinimizeToTray": true
 }

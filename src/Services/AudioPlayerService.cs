@@ -12,11 +12,14 @@ namespace SoundDeck.Services
         private static readonly Dictionary<string, PlayingSound> _activeSounds = new Dictionary<string, PlayingSound>();
         private static float _masterVolume = 0.8f;
         private static string _selectedDeviceName = "Padrão";
+        private static string _selectedMonitorName = "Nenhum";
 
         private class PlayingSound
         {
-            public WaveOutEvent WaveOut { get; set; }
-            public AudioFileReader Reader { get; set; }
+            public WaveOutEvent WaveOutPrimary { get; set; }
+            public AudioFileReader ReaderPrimary { get; set; }
+            public WaveOutEvent WaveOutMonitor { get; set; }
+            public AudioFileReader ReaderMonitor { get; set; }
         }
 
         public static float MasterVolume
@@ -39,6 +42,18 @@ namespace SoundDeck.Services
                 lock (_lock)
                 {
                     _selectedDeviceName = value;
+                }
+            }
+        }
+
+        public static string SelectedMonitorName
+        {
+            get { return _selectedMonitorName; }
+            set
+            {
+                lock (_lock)
+                {
+                    _selectedMonitorName = value;
                 }
             }
         }
@@ -66,7 +81,7 @@ namespace SoundDeck.Services
         // Obtém o índice do dispositivo pelo nome
         private static int GetDeviceIndex(string name)
         {
-            if (string.IsNullOrEmpty(name) || name == "Padrão")
+            if (string.IsNullOrEmpty(name) || name == "Padrão" || name == "Nenhum")
             {
                 return -1; // Dispositivo padrão do Windows
             }
@@ -104,30 +119,56 @@ namespace SoundDeck.Services
             {
                 try
                 {
-                    int deviceIndex = GetDeviceIndex(_selectedDeviceName);
-                    
-                    var waveOut = new WaveOutEvent
+                    // 1. Configurar Dispositivo de Transmissão Primário
+                    int primaryIndex = GetDeviceIndex(_selectedDeviceName);
+                    var waveOutPrimary = new WaveOutEvent
                     {
-                        DeviceNumber = deviceIndex
+                        DeviceNumber = primaryIndex
                     };
 
-                    var reader = new AudioFileReader(sound.FilePath)
+                    var readerPrimary = new AudioFileReader(sound.FilePath)
                     {
                         Volume = sound.Volume * masterVolume
                     };
 
-                    waveOut.Init(reader);
+                    waveOutPrimary.Init(readerPrimary);
+
+                    // 2. Configurar Dispositivo de Monitoramento Secundário (se houver)
+                    WaveOutEvent waveOutMonitor = null;
+                    AudioFileReader readerMonitor = null;
+
+                    if (!string.IsNullOrEmpty(_selectedMonitorName) && !_selectedMonitorName.Equals("Nenhum", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int monitorIndex = GetDeviceIndex(_selectedMonitorName);
+                        // Apenas cria se o dispositivo for diferente do primário
+                        if (monitorIndex != primaryIndex)
+                        {
+                            waveOutMonitor = new WaveOutEvent
+                            {
+                                DeviceNumber = monitorIndex
+                            };
+
+                            readerMonitor = new AudioFileReader(sound.FilePath)
+                            {
+                                Volume = sound.Volume * masterVolume
+                            };
+
+                            waveOutMonitor.Init(readerMonitor);
+                        }
+                    }
 
                     string soundId = sound.Id;
-                    waveOut.PlaybackStopped += (s, e) =>
+                    waveOutPrimary.PlaybackStopped += (s, e) =>
                     {
                         lock (_lock)
                         {
                             PlayingSound active;
                             if (_activeSounds.TryGetValue(soundId, out active))
                             {
-                                active.Reader.Dispose();
-                                active.WaveOut.Dispose();
+                                if (active.ReaderPrimary != null) active.ReaderPrimary.Dispose();
+                                if (active.WaveOutPrimary != null) active.WaveOutPrimary.Dispose();
+                                if (active.ReaderMonitor != null) active.ReaderMonitor.Dispose();
+                                if (active.WaveOutMonitor != null) active.WaveOutMonitor.Dispose();
                                 _activeSounds.Remove(soundId);
                             }
                         }
@@ -139,13 +180,19 @@ namespace SoundDeck.Services
 
                     var playingState = new PlayingSound
                     {
-                        WaveOut = waveOut,
-                        Reader = reader
+                        WaveOutPrimary = waveOutPrimary,
+                        ReaderPrimary = readerPrimary,
+                        WaveOutMonitor = waveOutMonitor,
+                        ReaderMonitor = readerMonitor
                     };
 
                     _activeSounds[sound.Id] = playingState;
 
-                    waveOut.Play();
+                    waveOutPrimary.Play();
+                    if (waveOutMonitor != null)
+                    {
+                        waveOutMonitor.Play();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -163,13 +210,21 @@ namespace SoundDeck.Services
                 PlayingSound active;
                 if (_activeSounds.TryGetValue(soundId, out active))
                 {
-                    if (active.WaveOut.PlaybackState == PlaybackState.Playing)
+                    if (active.WaveOutPrimary.PlaybackState == PlaybackState.Playing)
                     {
-                        active.WaveOut.Pause();
+                        active.WaveOutPrimary.Pause();
+                        if (active.WaveOutMonitor != null)
+                        {
+                            active.WaveOutMonitor.Pause();
+                        }
                     }
-                    else if (active.WaveOut.PlaybackState == PlaybackState.Paused)
+                    else if (active.WaveOutPrimary.PlaybackState == PlaybackState.Paused)
                     {
-                        active.WaveOut.Play();
+                        active.WaveOutPrimary.Play();
+                        if (active.WaveOutMonitor != null)
+                        {
+                            active.WaveOutMonitor.Play();
+                        }
                     }
                 }
             }
@@ -183,7 +238,11 @@ namespace SoundDeck.Services
                 PlayingSound active;
                 if (_activeSounds.TryGetValue(soundId, out active))
                 {
-                    active.WaveOut.Stop();
+                    active.WaveOutPrimary.Stop();
+                    if (active.WaveOutMonitor != null)
+                    {
+                        active.WaveOutMonitor.Stop();
+                    }
                 }
             }
         }
@@ -193,14 +252,17 @@ namespace SoundDeck.Services
         {
             lock (_lock)
             {
-                // Fazemos uma cópia das chaves para evitar modificação durante iteração
                 var keys = new List<string>(_activeSounds.Keys);
                 foreach (var key in keys)
                 {
                     PlayingSound active;
                     if (_activeSounds.TryGetValue(key, out active))
                     {
-                        active.WaveOut.Stop();
+                        active.WaveOutPrimary.Stop();
+                        if (active.WaveOutMonitor != null)
+                        {
+                            active.WaveOutMonitor.Stop();
+                        }
                     }
                 }
             }
@@ -214,7 +276,11 @@ namespace SoundDeck.Services
                 PlayingSound active;
                 if (_activeSounds.TryGetValue(soundId, out active))
                 {
-                    active.Reader.Volume = individualVolume * masterVolume;
+                    active.ReaderPrimary.Volume = individualVolume * masterVolume;
+                    if (active.ReaderMonitor != null)
+                    {
+                        active.ReaderMonitor.Volume = individualVolume * masterVolume;
+                    }
                 }
             }
         }
@@ -227,7 +293,7 @@ namespace SoundDeck.Services
                 PlayingSound active;
                 if (_activeSounds.TryGetValue(soundId, out active))
                 {
-                    return active.WaveOut.PlaybackState == PlaybackState.Playing;
+                    return active.WaveOutPrimary.PlaybackState == PlaybackState.Playing;
                 }
                 return false;
             }

@@ -35,6 +35,7 @@ namespace SoundDeck
         private StackPanel _sidebarList;
         private StackPanel _soundListContainer;
         private ComboBox _deviceComboBox;
+        private ComboBox _monitorComboBox;
         private TextBox _searchTextBox;
         private Slider _masterVolumeSlider;
         private TextBlock _emptyStateTextBlock;
@@ -54,6 +55,7 @@ namespace SoundDeck
 
             // Configurações do Áudio Player Service
             AudioPlayerService.SelectedDeviceName = _config.SelectedDevice;
+            AudioPlayerService.SelectedMonitorName = _config.SelectedMonitor;
             AudioPlayerService.MasterVolume = _config.MasterVolume;
 
             // Configurar Janela
@@ -163,9 +165,10 @@ namespace SoundDeck
 
             Grid topBarGrid = new Grid();
             topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Campo Busca
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) }); // Seletor Dispositivo
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(160) }); // Volume Geral
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) }); // Importar Áudio
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) }); // Seletor Dispositivo
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) }); // Seletor Monitoramento
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) }); // Volume Geral
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(125) }); // Importar Áudio
 
             // Campo Busca
             Border searchBorder = new Border
@@ -221,7 +224,8 @@ namespace SoundDeck
                 Foreground = ColorTextPrimary,
                 BorderBrush = ColorBorder,
                 VerticalContentAlignment = VerticalAlignment.Center,
-                Padding = new Thickness(8, 0, 8, 0)
+                Padding = new Thickness(8, 0, 8, 0),
+                ToolTip = "Dispositivo de Transmissão (ex: Canal Virtual de Áudio)"
             };
             RefreshAudioDevices();
             _deviceComboBox.SelectionChanged += (s, e) =>
@@ -236,6 +240,32 @@ namespace SoundDeck
             };
             Grid.SetColumn(_deviceComboBox, 1);
             topBarGrid.Children.Add(_deviceComboBox);
+
+            // Seletor Dispositivo de Monitoramento
+            _monitorComboBox = new ComboBox
+            {
+                Height = 35,
+                Margin = new Thickness(0, 0, 10, 0),
+                Background = ColorBgSidebar,
+                Foreground = ColorTextPrimary,
+                BorderBrush = ColorBorder,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(8, 0, 8, 0),
+                ToolTip = "Dispositivo de Monitoramento (Seus fones/alto-falantes para você ouvir)"
+            };
+            RefreshMonitorDevices();
+            _monitorComboBox.SelectionChanged += (s, e) =>
+            {
+                if (_monitorComboBox.SelectedItem != null)
+                {
+                    string selectedMonitor = _monitorComboBox.SelectedItem.ToString();
+                    _config.SelectedMonitor = selectedMonitor;
+                    AudioPlayerService.SelectedMonitorName = selectedMonitor;
+                    SettingsService.SaveConfig(_config);
+                }
+            };
+            Grid.SetColumn(_monitorComboBox, 2);
+            topBarGrid.Children.Add(_monitorComboBox);
 
             // Volume Geral Slider
             StackPanel volStack = new StackPanel
@@ -272,7 +302,7 @@ namespace SoundDeck
                 SettingsService.SaveConfig(_config);
             };
             volStack.Children.Add(_masterVolumeSlider);
-            Grid.SetColumn(volStack, 2);
+            Grid.SetColumn(volStack, 3);
             topBarGrid.Children.Add(volStack);
 
             // Botão Importar
@@ -281,7 +311,7 @@ namespace SoundDeck
                 ImportSoundWithDialog();
             });
             importBtn.Height = 35;
-            Grid.SetColumn(importBtn, 3);
+            Grid.SetColumn(importBtn, 4);
             topBarGrid.Children.Add(importBtn);
 
             topBarBorder.Child = topBarGrid;
@@ -789,6 +819,31 @@ namespace SoundDeck
             else
             {
                 _deviceComboBox.SelectedIndex = 0; // Padrão
+            }
+        }
+
+        // Recarrega os dispositivos no dropdown de monitoramento
+        private void RefreshMonitorDevices()
+        {
+            _monitorComboBox.Items.Clear();
+            _monitorComboBox.Items.Add("Nenhum");
+
+            var devices = AudioPlayerService.GetOutputDevices();
+            foreach (var d in devices)
+            {
+                if (d != "Padrão")
+                {
+                    _monitorComboBox.Items.Add(d);
+                }
+            }
+
+            if (_monitorComboBox.Items.Contains(_config.SelectedMonitor))
+            {
+                _monitorComboBox.SelectedItem = _config.SelectedMonitor;
+            }
+            else
+            {
+                _monitorComboBox.SelectedIndex = 0; // Nenhum
             }
         }
 
