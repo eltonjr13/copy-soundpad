@@ -7,7 +7,7 @@
       "DurationText": "00:16",
       "CategoryName": "Memes",
       "Volume": 1.0,
-      "Hotkey": "",
+      "Hotkey": "Ctrl+D1",
       "IsFavorite": false,
       "HotkeyId": 1000
     },
@@ -18,9 +18,9 @@
       "DurationText": "00:01",
       "CategoryName": "Memes",
       "Volume": 1.0,
-      "Hotkey": "",
+      "Hotkey": "Ctrl+D2",
       "IsFavorite": false,
-      "HotkeyId": 1001
+      "HotkeyId": 1000
     }
   ],
   "Categories": [
@@ -121,8 +121,9 @@
       "Icon": "🎙️"
     }
   ],
-  "MasterVolume": 0.912359536,
-  "SelectedDevice": "CABLE Input (VB-Audio Virtual C",
+  "MasterVolume": 0.902359545,
+  "SelectedDevice": "CABLE In 16ch (VB-Audio Virtual",
   "SelectedMonitor": "FxSound Speakers (FxSound Audio",
+  "SelectedMic": "Microphone (7- FIFINE Microphon",
   "MinimizeToTray": true
 }

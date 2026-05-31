@@ -13,6 +13,12 @@ namespace SoundDeck.Services
         private static float _masterVolume = 0.8f;
         private static string _selectedDeviceName = "Padrão";
         private static string _selectedMonitorName = "Nenhum";
+        private static string _selectedMicName = "Nenhum";
+
+        // Variáveis para o Passthrough do Microfone
+        private static WaveInEvent _micIn;
+        private static WaveOutEvent _micOut;
+        private static BufferedWaveProvider _micBuffer;
 
         private class PlayingSound
         {
@@ -43,6 +49,7 @@ namespace SoundDeck.Services
                 {
                     _selectedDeviceName = value;
                 }
+                UpdateMicPassthrough();
             }
         }
 
@@ -55,6 +62,19 @@ namespace SoundDeck.Services
                 {
                     _selectedMonitorName = value;
                 }
+            }
+        }
+
+        public static string SelectedMicName
+        {
+            get { return _selectedMicName; }
+            set
+            {
+                lock (_lock)
+                {
+                    _selectedMicName = value;
+                }
+                UpdateMicPassthrough();
             }
         }
 
@@ -78,7 +98,27 @@ namespace SoundDeck.Services
             return devices;
         }
 
-        // Obtém o índice do dispositivo pelo nome
+        // Obtém a lista de nomes dos microfones disponíveis
+        public static List<string> GetInputDevices()
+        {
+            var mics = new List<string> { "Nenhum" };
+            try
+            {
+                int count = WaveIn.DeviceCount;
+                for (int i = 0; i < count; i++)
+                {
+                    var caps = WaveIn.GetCapabilities(i);
+                    mics.Add(caps.ProductName);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Erro ao listar microfones: " + ex.Message);
+            }
+            return mics;
+        }
+
+        // Obtém o índice do dispositivo de saída pelo nome
         private static int GetDeviceIndex(string name)
         {
             if (string.IsNullOrEmpty(name) || name == "Padrão" || name == "Nenhum")
@@ -103,6 +143,121 @@ namespace SoundDeck.Services
             }
 
             return -1;
+        }
+
+        // Obtém o índice do microfone pelo nome
+        private static int GetMicIndex(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name == "Nenhum")
+            {
+                return -1;
+            }
+
+            try
+            {
+                int count = WaveIn.DeviceCount;
+                for (int i = 0; i < count; i++)
+                {
+                    if (WaveIn.GetCapabilities(i).ProductName == name)
+                    {
+                        return i;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Erro ao buscar índice do microfone: " + ex.Message);
+            }
+
+            return -1;
+        }
+
+        // Atualiza o redirecionamento do microfone para o canal de transmissão
+        public static void UpdateMicPassthrough()
+        {
+            lock (_lock)
+            {
+                StopMicPassthrough();
+
+                if (string.IsNullOrEmpty(_selectedMicName) || _selectedMicName.Equals("Nenhum", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                try
+                {
+                    int micIndex = GetMicIndex(_selectedMicName);
+                    int outputIndex = GetDeviceIndex(_selectedDeviceName);
+
+                    if (micIndex >= 0)
+                    {
+                        _micIn = new WaveInEvent
+                        {
+                            DeviceNumber = micIndex,
+                            BufferMilliseconds = 30, // Latência muito baixa (30ms)
+                            WaveFormat = new WaveFormat(44100, 16, 1) // Qualidade CD (44.1 kHz, 16-bit, Mono)
+                        };
+
+                        _micBuffer = new BufferedWaveProvider(_micIn.WaveFormat)
+                        {
+                            DiscardOnBufferOverflow = true
+                        };
+
+                        _micOut = new WaveOutEvent
+                        {
+                            DeviceNumber = outputIndex
+                        };
+
+                        _micOut.Init(_micBuffer);
+
+                        _micIn.DataAvailable += (sender, e) =>
+                        {
+                            lock (_lock)
+                            {
+                                if (_micBuffer != null)
+                                {
+                                    _micBuffer.AddSamples(e.Buffer, 0, e.BytesRecorded);
+                                }
+                            }
+                        };
+
+                        _micOut.Play();
+                        _micIn.StartRecording();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Erro ao iniciar passthrough de microfone: " + ex.Message);
+                }
+            }
+        }
+
+        // Para o passthrough de microfone
+        public static void StopMicPassthrough()
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    if (_micIn != null)
+                    {
+                        _micIn.StopRecording();
+                        _micIn.Dispose();
+                        _micIn = null;
+                    }
+                    if (_micOut != null)
+                    {
+                        _micOut.Stop();
+                        _micOut.Dispose();
+                        _micOut = null;
+                    }
+                    _micBuffer = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Erro ao parar passthrough de microfone: " + ex.Message);
+                }
+            }
         }
 
         // Toca um áudio

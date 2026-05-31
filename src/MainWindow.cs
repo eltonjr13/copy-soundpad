@@ -35,6 +35,7 @@ namespace SoundDeck
         private StackPanel _sidebarList;
         private StackPanel _soundListContainer;
         private ComboBox _deviceComboBox;
+        private ComboBox _micComboBox;
         private ComboBox _monitorComboBox;
         private TextBox _searchTextBox;
         private Slider _masterVolumeSlider;
@@ -56,6 +57,7 @@ namespace SoundDeck
             // Configurações do Áudio Player Service
             AudioPlayerService.SelectedDeviceName = _config.SelectedDevice;
             AudioPlayerService.SelectedMonitorName = _config.SelectedMonitor;
+            AudioPlayerService.SelectedMicName = _config.SelectedMic;
             AudioPlayerService.MasterVolume = _config.MasterVolume;
 
             // Configurar Janela
@@ -165,21 +167,32 @@ namespace SoundDeck
 
             Grid topBarGrid = new Grid();
             topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Campo Busca
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) }); // Seletor Dispositivo
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) }); // Seletor Monitoramento
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) }); // Volume Geral
-            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(125) }); // Importar Áudio
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) }); // Seletor Dispositivo
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) }); // Seletor Microfone
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) }); // Seletor Monitoramento
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) }); // Volume Geral
+            topBarGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) }); // Importar Áudio
 
-            // Campo Busca
+            // 0. Campo Busca (Painel Empilhado)
+            StackPanel searchPanel = new StackPanel { Margin = new Thickness(0, 0, 10, 0) };
+            TextBlock searchLabel = new TextBlock
+            {
+                Text = "BUSCAR SONS",
+                Foreground = ColorTextSecondary,
+                FontSize = 9,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            searchPanel.Children.Add(searchLabel);
+
             Border searchBorder = new Border
             {
                 Background = ColorBgSidebar,
                 CornerRadius = new CornerRadius(6),
                 BorderBrush = ColorBorder,
                 BorderThickness = new Thickness(1),
-                Padding = new Thickness(10, 5, 10, 5),
-                Margin = new Thickness(0, 0, 10, 0),
-                Height = 35
+                Padding = new Thickness(10, 0, 10, 0),
+                Height = 30
             };
             Grid searchGrid = new Grid();
             searchGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -203,29 +216,64 @@ namespace SoundDeck
                 VerticalAlignment = VerticalAlignment.Center,
                 CaretBrush = ColorAccent
             };
-            // Placeholder/Dica de busca
             _searchTextBox.TextChanged += (s, e) =>
             {
                 _searchQuery = _searchTextBox.Text;
                 RefreshSoundList();
             };
+            _searchTextBox.GotFocus += (s, e) => searchBorder.BorderBrush = ColorAccent;
+            _searchTextBox.LostFocus += (s, e) => searchBorder.BorderBrush = ColorBorder;
+
             Grid.SetColumn(_searchTextBox, 1);
             searchGrid.Children.Add(_searchTextBox);
             searchBorder.Child = searchGrid;
-            Grid.SetColumn(searchBorder, 0);
-            topBarGrid.Children.Add(searchBorder);
+            searchPanel.Children.Add(searchBorder);
+            Grid.SetColumn(searchPanel, 0);
+            topBarGrid.Children.Add(searchPanel);
 
-            // Seletor Dispositivo de Áudio
+            // Estilos para os ComboBoxes (Alta Legibilidade e Contraste no Tema Escuro)
+            Style comboStyle = new Style(typeof(ComboBox));
+            comboStyle.Setters.Add(new Setter(ComboBox.BackgroundProperty, ColorBgCard));
+            comboStyle.Setters.Add(new Setter(ComboBox.ForegroundProperty, ColorTextPrimary));
+            comboStyle.Setters.Add(new Setter(ComboBox.BorderBrushProperty, ColorBorder));
+            comboStyle.Setters.Add(new Setter(ComboBox.BorderThicknessProperty, new Thickness(1)));
+            comboStyle.Setters.Add(new Setter(ComboBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+            comboStyle.Setters.Add(new Setter(ComboBox.PaddingProperty, new Thickness(8, 4, 8, 4)));
+
+            Style itemStyle = new Style(typeof(ComboBoxItem));
+            itemStyle.Setters.Add(new Setter(ComboBoxItem.BackgroundProperty, ColorBgCard));
+            itemStyle.Setters.Add(new Setter(ComboBoxItem.ForegroundProperty, ColorTextPrimary));
+            itemStyle.Setters.Add(new Setter(ComboBoxItem.PaddingProperty, new Thickness(10, 8, 10, 8)));
+            itemStyle.Setters.Add(new Setter(ComboBoxItem.BorderThicknessProperty, new Thickness(0)));
+
+            Trigger hoverTrigger = new Trigger { Property = ComboBoxItem.IsMouseOverProperty, Value = true };
+            hoverTrigger.Setters.Add(new Setter(ComboBoxItem.BackgroundProperty, ColorAccent));
+            hoverTrigger.Setters.Add(new Setter(ComboBoxItem.ForegroundProperty, Brushes.White));
+            itemStyle.Triggers.Add(hoverTrigger);
+
+            Trigger selectedTrigger = new Trigger { Property = ComboBoxItem.IsSelectedProperty, Value = true };
+            selectedTrigger.Setters.Add(new Setter(ComboBoxItem.BackgroundProperty, ColorBgCardHover));
+            selectedTrigger.Setters.Add(new Setter(ComboBoxItem.ForegroundProperty, ColorAccent));
+            itemStyle.Triggers.Add(selectedTrigger);
+
+            // 1. Bloco Transmissão
+            StackPanel transmissionPanel = new StackPanel { Margin = new Thickness(0, 0, 10, 0) };
+            TextBlock transLabel = new TextBlock
+            {
+                Text = "TRANSMISSÃO",
+                Foreground = ColorTextSecondary,
+                FontSize = 9,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            transmissionPanel.Children.Add(transLabel);
+
             _deviceComboBox = new ComboBox
             {
-                Height = 35,
-                Margin = new Thickness(0, 0, 10, 0),
-                Background = ColorBgSidebar,
-                Foreground = ColorTextPrimary,
-                BorderBrush = ColorBorder,
-                VerticalContentAlignment = VerticalAlignment.Center,
-                Padding = new Thickness(8, 0, 8, 0),
-                ToolTip = "Dispositivo de Transmissão (ex: Canal Virtual de Áudio)"
+                Height = 30,
+                Style = comboStyle,
+                ItemContainerStyle = itemStyle,
+                ToolTip = "Dispositivo de Transmissão (ex: Cabo Virtual)"
             };
             RefreshAudioDevices();
             _deviceComboBox.SelectionChanged += (s, e) =>
@@ -238,20 +286,62 @@ namespace SoundDeck
                     SettingsService.SaveConfig(_config);
                 }
             };
-            Grid.SetColumn(_deviceComboBox, 1);
-            topBarGrid.Children.Add(_deviceComboBox);
+            transmissionPanel.Children.Add(_deviceComboBox);
+            Grid.SetColumn(transmissionPanel, 1);
+            topBarGrid.Children.Add(transmissionPanel);
 
-            // Seletor Dispositivo de Monitoramento
+            // 2. Bloco Microfone Real
+            StackPanel micPanel = new StackPanel { Margin = new Thickness(0, 0, 10, 0) };
+            TextBlock micLabel = new TextBlock
+            {
+                Text = "MICROFONE REAL",
+                Foreground = ColorTextSecondary,
+                FontSize = 9,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            micPanel.Children.Add(micLabel);
+
+            _micComboBox = new ComboBox
+            {
+                Height = 30,
+                Style = comboStyle,
+                ItemContainerStyle = itemStyle,
+                ToolTip = "Selecione seu microfone real (ex: FIFINE) para misturar sua voz com o som"
+            };
+            RefreshMicDevices();
+            _micComboBox.SelectionChanged += (s, e) =>
+            {
+                if (_micComboBox.SelectedItem != null)
+                {
+                    string selectedMic = _micComboBox.SelectedItem.ToString();
+                    _config.SelectedMic = selectedMic;
+                    AudioPlayerService.SelectedMicName = selectedMic;
+                    SettingsService.SaveConfig(_config);
+                }
+            };
+            micPanel.Children.Add(_micComboBox);
+            Grid.SetColumn(micPanel, 2);
+            topBarGrid.Children.Add(micPanel);
+
+            // 3. Bloco Monitoramento
+            StackPanel monitorPanel = new StackPanel { Margin = new Thickness(0, 0, 10, 0) };
+            TextBlock monitorLabel = new TextBlock
+            {
+                Text = "MONITORAMENTO",
+                Foreground = ColorTextSecondary,
+                FontSize = 9,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            monitorPanel.Children.Add(monitorLabel);
+
             _monitorComboBox = new ComboBox
             {
-                Height = 35,
-                Margin = new Thickness(0, 0, 10, 0),
-                Background = ColorBgSidebar,
-                Foreground = ColorTextPrimary,
-                BorderBrush = ColorBorder,
-                VerticalContentAlignment = VerticalAlignment.Center,
-                Padding = new Thickness(8, 0, 8, 0),
-                ToolTip = "Dispositivo de Monitoramento (Seus fones/alto-falantes para você ouvir)"
+                Height = 30,
+                Style = comboStyle,
+                ItemContainerStyle = itemStyle,
+                ToolTip = "Seu fone de ouvido para você ouvir os sons sendo tocados"
             };
             RefreshMonitorDevices();
             _monitorComboBox.SelectionChanged += (s, e) =>
@@ -264,15 +354,26 @@ namespace SoundDeck
                     SettingsService.SaveConfig(_config);
                 }
             };
-            Grid.SetColumn(_monitorComboBox, 2);
-            topBarGrid.Children.Add(_monitorComboBox);
+            monitorPanel.Children.Add(_monitorComboBox);
+            Grid.SetColumn(monitorPanel, 3);
+            topBarGrid.Children.Add(monitorPanel);
 
-            // Volume Geral Slider
+            // 4. Bloco Volume Geral
+            StackPanel masterVolPanel = new StackPanel { Margin = new Thickness(0, 0, 15, 0) };
+            TextBlock volLabelHeader = new TextBlock
+            {
+                Text = "VOLUME GERAL",
+                Foreground = ColorTextSecondary,
+                FontSize = 9,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            masterVolPanel.Children.Add(volLabelHeader);
+
             StackPanel volStack = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 15, 0)
+                Height = 30
             };
             TextBlock volIcon = new TextBlock
             {
@@ -297,21 +398,21 @@ namespace SoundDeck
                 float newVol = (float)(_masterVolumeSlider.Value / 100.0);
                 _config.MasterVolume = newVol;
                 AudioPlayerService.MasterVolume = newVol;
-                
-                // Salvar após pequeno delay ou na liberação do slider. Para simplificar, salva instantâneo.
                 SettingsService.SaveConfig(_config);
             };
             volStack.Children.Add(_masterVolumeSlider);
-            Grid.SetColumn(volStack, 3);
-            topBarGrid.Children.Add(volStack);
+            masterVolPanel.Children.Add(volStack);
+            Grid.SetColumn(masterVolPanel, 4);
+            topBarGrid.Children.Add(masterVolPanel);
 
-            // Botão Importar
+            // 5. Botão Importar (Alinhado verticalmente pela margem superior)
             Border importBtn = CreateInteractiveButton("📥 Importar Som", ColorAccent, ColorTextPrimary, () =>
             {
                 ImportSoundWithDialog();
             });
-            importBtn.Height = 35;
-            Grid.SetColumn(importBtn, 4);
+            importBtn.Height = 30;
+            importBtn.Margin = new Thickness(0, 13, 0, 0);
+            Grid.SetColumn(importBtn, 5);
             topBarGrid.Children.Add(importBtn);
 
             topBarBorder.Child = topBarGrid;
@@ -847,6 +948,26 @@ namespace SoundDeck
             }
         }
 
+        // Recarrega os dispositivos no dropdown de microfone
+        private void RefreshMicDevices()
+        {
+            _micComboBox.Items.Clear();
+            var mics = AudioPlayerService.GetInputDevices();
+            foreach (var m in mics)
+            {
+                _micComboBox.Items.Add(m);
+            }
+
+            if (mics.Contains(_config.SelectedMic))
+            {
+                _micComboBox.SelectedItem = _config.SelectedMic;
+            }
+            else
+            {
+                _micComboBox.SelectedIndex = 0; // Nenhum
+            }
+        }
+
         #endregion
 
         #region Ações e Comportamentos do Soundboard
@@ -1354,8 +1475,9 @@ namespace SoundDeck
                     }
                 }
                 
-                // Descartar recursos de áudio
+                // Descartar recursos de áudio e passthrough de microfone
                 AudioPlayerService.StopAll();
+                AudioPlayerService.StopMicPassthrough();
 
                 // Destruir ícone da bandeja
                 if (_notifyIcon != null)

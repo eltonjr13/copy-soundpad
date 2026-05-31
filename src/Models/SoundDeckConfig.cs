@@ -10,6 +10,7 @@ namespace SoundDeck.Models
         public float MasterVolume { get; set; }
         public string SelectedDevice { get; set; }
         public string SelectedMonitor { get; set; }
+        public string SelectedMic { get; set; }
         public bool MinimizeToTray { get; set; }
 
         public SoundDeckConfig()
@@ -19,6 +20,7 @@ namespace SoundDeck.Models
             MasterVolume = 0.8f;
             SelectedDevice = "Padrão";
             SelectedMonitor = "Nenhum";
+            SelectedMic = "Nenhum";
             MinimizeToTray = true;
 
             // Categorias padrão sugeridas pelo usuário
